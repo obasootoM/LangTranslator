@@ -20,5 +20,7 @@ migrateup:
 migratedown:
 	migrate -path db/migration -database "postgresql://root:postgres@localhost:8001/client?sslmode=disable" -verbose down
 
+test:
+	go test -v ./...
 
-.PHONY: postgres migrate sqlc createdb dropdb migrateup migratedown
+.PHONY: postgres migrate sqlc createdb dropdb migrateup migratedown test
