@@ -22,11 +22,15 @@ func NewServer(store *db.Store) *Server {
 	}
 	router := gin.Default()
 
-	router.POST("")
+	router.POST("/signup",server.createClient)
+	router.POST("/loginin",server.loginClient)
 	server.router = router
 	return &server
 }
 
 func errorResponse(err error) gin.H {
   return gin.H{"err":err.Error()}
+}
+func (server Server) StartTls(address string) error {
+	return server.router.RunTLS(address,"cert.perm","key.perm")
 }

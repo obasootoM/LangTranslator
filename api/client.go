@@ -18,7 +18,7 @@ type Register struct {
 	Password   string `form:"password" json:"password" xml:"password" binding:"required,min=7"`
 }
 
-func (server *Server) CreateClient(ctx *gin.Context) {
+func (server *Server) createClient(ctx *gin.Context) {
 
 	var req Register
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -82,13 +82,13 @@ func NewClient(client db.Client) ClientResponse {
 }
 
 
-func (server Server) loginClient(ctx gin.Context) {
+func (server Server) loginClient(ctx *gin.Context) {
 	var req ClientRequest
 	if err := ctx.ShouldBindJSON(req); err != nil {
 		ctx.JSON(http.StatusNotFound, errorResponse(err))
 		return
 	}
-	client, err := server.store.GetEmail(&ctx,req.Email)
+	client, err := server.store.GetEmail(ctx,req.Email)
 	if err != nil {
        if err == sql.ErrNoRows {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
