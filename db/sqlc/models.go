@@ -6,6 +6,7 @@ package db
 
 import (
 	"database/sql"
+	"time"
 )
 
 type Client struct {
@@ -15,7 +16,7 @@ type Client struct {
 	Email       string       `json:"email"`
 	PhoneNumber int32        `json:"phone_number"`
 	Language    string       `json:"language"`
-	Time        interface{}  `json:"time"`
+	Time        time.Time    `json:"time"`
 	UpdatedAt   sql.NullTime `json:"updated_at"`
 	CreatedAt   sql.NullTime `json:"created_at"`
 }

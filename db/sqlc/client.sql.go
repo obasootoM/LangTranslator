@@ -11,18 +11,17 @@ import (
 
 const createClient = `-- name: CreateClient :one
 INSERT INTO client (
-  first_name,second_name,email,phone_number,language,time
-) VALUES ($1,$2,$3,$4,$5,$6)
+  first_name,second_name,email,phone_number,language
+) VALUES ($1,$2,$3,$4,$5)
 RETURNING id, first_name, second_name, email, phone_number, language, time, updated_at, created_at
 `
 
 type CreateClientParams struct {
-	FirstName   string      `json:"first_name"`
-	SecondName  string      `json:"second_name"`
-	Email       string      `json:"email"`
-	PhoneNumber int32       `json:"phone_number"`
-	Language    string      `json:"language"`
-	Time        interface{} `json:"time"`
+	FirstName   string `json:"first_name"`
+	SecondName  string `json:"second_name"`
+	Email       string `json:"email"`
+	PhoneNumber int32  `json:"phone_number"`
+	Language    string `json:"language"`
 }
 
 func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Client, error) {
@@ -32,7 +31,6 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 		arg.Email,
 		arg.PhoneNumber,
 		arg.Language,
-		arg.Time,
 	)
 	var i Client
 	err := row.Scan(
