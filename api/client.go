@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"net/http"
 	"time"
 
@@ -52,12 +53,53 @@ type ClientRequest struct {
 }
 
 type ClientResponse struct {
-	FirstName  string `form:"firstname" json:"firstname" xml:"firstname"  binding:"required,firstname"`
-	SecondName string `form:"secondname" json:"secondname" xml:"secondname"  binding:"required,secondname"`
-	Email      string `form:"email" json:"email" xml:"email"  binding:"required, email"`
-	Language   string `form:"language" json:"language" xml:"language" binding:"required,language"`
-	Password   string `form:"password" json:"password" xml:"password" binding:"required,min=7"`
+	FirstName         string    `form:"firstname" json:"firstname" xml:"firstname"  binding:"required,firstname"`
+	SecondName        string    `form:"secondname" json:"secondname" xml:"secondname"  binding:"required,secondname"`
+	Email             string    `form:"email" json:"email" xml:"email"  binding:"required, email"`
+	Language          string    `form:"language" json:"language" xml:"language" binding:"required,language"`
+	Password          string    `form:"password" json:"password" xml:"password" binding:"required,min=7"`
 	PasswordChangedAt time.Time `form:"passwordchangeat" json:"passwordchangeat"`
-	UpdatedAt time.Time `json:"updatedat"`
-	ChangedAt time.Time `json:"changedat"`
+	UpdatedAt         time.Time `json:"updatedat"`
+	CreateAt          time.Time `json:"createdat"`
+}
+
+type LoginClientRequest struct {
+	Client ClientResponse `form:"client"`
+}
+
+func NewClient(client db.Client) ClientResponse {
+	clients := ClientResponse{
+		FirstName:  client.FirstName,
+		SecondName: client.SecondName,
+		Email:      client.Email,
+		Language: client.Language,
+		Password: client.Password,
+		PasswordChangedAt: client.PasswordChangedAt,
+		UpdatedAt: client.UpdatedAt.Time,
+		CreateAt: client.CreatedAt.Time,
+	}
+	return clients
+}
+
+
+func (server Server) loginClient(ctx gin.Context) {
+	var req ClientRequest
+	if err := ctx.ShouldBindJSON(req); err != nil {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
+	client, err := server.store.GetEmail(&ctx,req.Email)
+	if err != nil {
+       if err == sql.ErrNoRows {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	   }
+	   ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	   return
+	}
+
+	arg := LoginClientRequest{
+        Client: NewClient(client),
+	}
+	ctx.JSON(http.StatusOK,arg)
 }

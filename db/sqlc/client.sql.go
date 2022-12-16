@@ -50,3 +50,28 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 	)
 	return i, err
 }
+
+const getEmail = `-- name: GetEmail :one
+SELECT id, first_name, second_name, email, phone_number, language, time, password, password_changed_at, updated_at, created_at FROM client 
+WHERE  email = $1
+LIMIT 1
+`
+
+func (q *Queries) GetEmail(ctx context.Context, email string) (Client, error) {
+	row := q.db.QueryRowContext(ctx, getEmail, email)
+	var i Client
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.SecondName,
+		&i.Email,
+		&i.PhoneNumber,
+		&i.Language,
+		&i.Time,
+		&i.Password,
+		&i.PasswordChangedAt,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+	)
+	return i, err
+}
