@@ -11,18 +11,18 @@ import (
 
 const createClient = `-- name: CreateClient :one
 INSERT INTO client (
-  first_name,second_name,email,phone_number,language,password
+  first_name,second_name,email,password,phone_number,language
 ) VALUES ($1,$2,$3,$4,$5,$6)
-RETURNING id, first_name, second_name, email, phone_number, language, time, password, password_changed_at, updated_at, created_at
+RETURNING id, first_name, second_name, email, phone_number, language, time, password, updated_at, created_at
 `
 
 type CreateClientParams struct {
 	FirstName   string `json:"first_name"`
 	SecondName  string `json:"second_name"`
 	Email       string `json:"email"`
-	PhoneNumber int32  `json:"phone_number"`
-	Language    string `json:"language"`
 	Password    string `json:"password"`
+	PhoneNumber string `json:"phone_number"`
+	Language    string `json:"language"`
 }
 
 func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Client, error) {
@@ -30,9 +30,9 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 		arg.FirstName,
 		arg.SecondName,
 		arg.Email,
+		arg.Password,
 		arg.PhoneNumber,
 		arg.Language,
-		arg.Password,
 	)
 	var i Client
 	err := row.Scan(
@@ -44,7 +44,6 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 		&i.Language,
 		&i.Time,
 		&i.Password,
-		&i.PasswordChangedAt,
 		&i.UpdatedAt,
 		&i.CreatedAt,
 	)
@@ -52,7 +51,7 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 }
 
 const getEmail = `-- name: GetEmail :one
-SELECT id, first_name, second_name, email, phone_number, language, time, password, password_changed_at, updated_at, created_at FROM client 
+SELECT id, first_name, second_name, email, phone_number, language, time, password, updated_at, created_at FROM client 
 WHERE  email = $1
 LIMIT 1
 `
@@ -69,7 +68,6 @@ func (q *Queries) GetEmail(ctx context.Context, email string) (Client, error) {
 		&i.Language,
 		&i.Time,
 		&i.Password,
-		&i.PasswordChangedAt,
 		&i.UpdatedAt,
 		&i.CreatedAt,
 	)

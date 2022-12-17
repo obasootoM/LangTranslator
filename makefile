@@ -26,4 +26,8 @@ test:
 certificate:
 	go run $GOROOT/usr/local/go/src/crypto/tls/generate_cert.go --host=localhost    
 
-.PHONY: postgres migrate sqlc createdb dropdb migrateup migratedown test
+
+main:
+	go run main.go
+
+.PHONY: postgres migrate sqlc createdb dropdb migrateup migratedown test main

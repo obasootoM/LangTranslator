@@ -5,32 +5,29 @@ import (
 	db "github.com/obasootom/langtranslator/db/sqlc"
 )
 
-
-
-
-
 type Server struct {
-     store *db.Store
-	 router *gin.Engine
+	store  *db.Store
+	router *gin.Engine
 }
 
-
-
-func NewServer(store *db.Store) *Server {
+func NewServer(store *db.Store) (*Server,error) {
 	server := Server{
 		store: store,
 	}
 	router := gin.Default()
 
-	router.POST("/signup",server.createClient)
-	router.POST("/loginin",server.loginClient)
+	router.POST("/signup", server.createClient)
+	router.POST("/login", server.loginClient)
 	server.router = router
-	return &server
+	return &server,nil
 }
 
 func errorResponse(err error) gin.H {
-  return gin.H{"err":err.Error()}
+	return gin.H{"err": err.Error()}
 }
 func (server Server) StartTls(address string) error {
-	return server.router.RunTLS(address,"cert.perm","key.perm")
+	return server.router.RunTLS(address, "cert.pem", "key.pem")
+}
+func (server Server)  Start(address string) error {
+	return server.router.Run(address)
 }

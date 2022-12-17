@@ -5,20 +5,18 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 )
 
 type Client struct {
-	ID                int64        `json:"id"`
-	FirstName         string       `json:"first_name"`
-	SecondName        string       `json:"second_name"`
-	Email             string       `json:"email"`
-	PhoneNumber       int32        `json:"phone_number"`
-	Language          string       `json:"language"`
-	Time              time.Time    `json:"time"`
-	Password          string       `json:"password"`
-	PasswordChangedAt time.Time    `json:"password_changed_at"`
-	UpdatedAt         sql.NullTime `json:"updated_at"`
-	CreatedAt         sql.NullTime `json:"created_at"`
+	ID          int64     `json:"id"`
+	FirstName   string    `json:"first_name"`
+	SecondName  string    `json:"second_name"`
+	Email       string    `json:"email"`
+	PhoneNumber string    `json:"phone_number"`
+	Language    string    `json:"language"`
+	Time        time.Time `json:"time"`
+	Password    string    `json:"password"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	CreatedAt   time.Time `json:"created_at"`
 }
