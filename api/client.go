@@ -1,7 +1,6 @@
 package api
 
 import (
-
 	"database/sql"
 	"net/http"
 
@@ -17,8 +16,10 @@ type Register struct {
 	Secondname  string `form:"secondname" json:"secondname" xml:"secondname"  binding:"required,alphanum"`
 	Email       string `form:"email" json:"email" xml:"email"  binding:"required,email"`
 	PhoneNumber string `form:"phonenumber" xml:"phonenumber" binding:"required,min=11"`
-	Language    string `form:"language" json:"language" xml:"language" binding:"required,oneof=yoruba hausa igbo"`
+	Currency    string `form:"currency" json:"currency" xml:"currency" binding:"required,oneof= USD GBP EUR CHF JPY TRY"`
+	Language    string `form:"language" json:"language" xml:"language" binding:"required,oneof= EN FR ES DE NL TR AR ZH"`
 	Password    string `form:"password" json:"password" xml:"password" binding:"required,min=7"`
+	Time        string `form:"time" json:"time" binding:"required"`
 }
 
 func (server *Server) createClient(ctx *gin.Context) {
@@ -35,6 +36,7 @@ func (server *Server) createClient(ctx *gin.Context) {
 		PhoneNumber: string(req.PhoneNumber),
 		Language:    req.Language,
 		Password:    req.Password,
+		Time:        req.Time,
 	}
 	clent, err := server.store.CreateClient(ctx, arg)
 	if err != nil {
@@ -63,6 +65,7 @@ type ClientResponse struct {
 	PhoneNumber string    `form:"phonenumber" xml:"phonenumber" binding:"required,min=11"`
 	Language    string    `form:"language" json:"language" xml:"language" binding:"required,language"`
 	Password    string    `form:"password" json:"password" xml:"password" binding:"required,min=7"`
+	Time        string    `json:"time" form:"time" binding:"required"`
 	UpdatedAt   time.Time `json:"updatedat"`
 	CreateAt    time.Time `json:"createdat"`
 }
@@ -73,14 +76,15 @@ type LoginClientRequest struct {
 
 func NewClient(client db.Client) ClientResponse {
 	clients := ClientResponse{
-		FirstName:  client.FirstName,
-		SecondName: client.SecondName,
-		Email:      client.Email,
-		Language:   client.Language,
+		FirstName:   client.FirstName,
+		SecondName:  client.SecondName,
+		Email:       client.Email,
+		Language:    client.Language,
 		PhoneNumber: client.PhoneNumber,
-		Password:   client.Password,
-		UpdatedAt:  client.UpdatedAt,
-		CreateAt:   client.CreatedAt,
+		Password:    client.Password,
+		UpdatedAt:   client.UpdatedAt,
+		CreateAt:    client.CreatedAt,
+		Time:        client.Time,
 	}
 	return clients
 }

@@ -5,7 +5,8 @@ CREATE TABLE "client" (
   "email" varchar NOT NULL,
   "phone_number" varchar NOT NULL,
   "language" varchar NOT NULL,
-  "time" timestamp NOT NULL DEFAULT 'now()',
+  "currency" varchar NOT NULL,
+  "time" varchar NOT NULL,
   "password" varchar NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT 'now()',
   "created_at" timestamptz NOT NULL DEFAULT 'now()'

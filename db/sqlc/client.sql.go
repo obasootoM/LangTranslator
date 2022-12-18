@@ -11,9 +11,9 @@ import (
 
 const createClient = `-- name: CreateClient :one
 INSERT INTO client (
-  first_name,second_name,email,password,phone_number,language
-) VALUES ($1,$2,$3,$4,$5,$6)
-RETURNING id, first_name, second_name, email, phone_number, language, time, password, updated_at, created_at
+  first_name,second_name,email,password,phone_number,language,currency,time
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+RETURNING id, first_name, second_name, email, phone_number, language, currency, time, password, updated_at, created_at
 `
 
 type CreateClientParams struct {
@@ -23,6 +23,8 @@ type CreateClientParams struct {
 	Password    string `json:"password"`
 	PhoneNumber string `json:"phone_number"`
 	Language    string `json:"language"`
+	Currency    string `json:"currency"`
+	Time        string `json:"time"`
 }
 
 func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Client, error) {
@@ -33,6 +35,8 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 		arg.Password,
 		arg.PhoneNumber,
 		arg.Language,
+		arg.Currency,
+		arg.Time,
 	)
 	var i Client
 	err := row.Scan(
@@ -42,6 +46,7 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 		&i.Email,
 		&i.PhoneNumber,
 		&i.Language,
+		&i.Currency,
 		&i.Time,
 		&i.Password,
 		&i.UpdatedAt,
@@ -51,7 +56,7 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 }
 
 const getEmail = `-- name: GetEmail :one
-SELECT id, first_name, second_name, email, phone_number, language, time, password, updated_at, created_at FROM client 
+SELECT id, first_name, second_name, email, phone_number, language, currency, time, password, updated_at, created_at FROM client 
 WHERE  email = $1
 LIMIT 1
 `
@@ -66,6 +71,7 @@ func (q *Queries) GetEmail(ctx context.Context, email string) (Client, error) {
 		&i.Email,
 		&i.PhoneNumber,
 		&i.Language,
+		&i.Currency,
 		&i.Time,
 		&i.Password,
 		&i.UpdatedAt,
