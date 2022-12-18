@@ -15,7 +15,7 @@ type Register struct {
 	Firstname   string `form:"firstname" json:"firstname" xml:"firstname"  binding:"required,alphanum"`
 	Secondname  string `form:"secondname" json:"secondname" xml:"secondname"  binding:"required,alphanum"`
 	Email       string `form:"email" json:"email" xml:"email"  binding:"required,email"`
-	PhoneNumber string `form:"phonenumber" xml:"phonenumber" binding:"required,min=11"`
+	PhoneNumber string `form:"phonenumber" json:"phonenumber" xml:"phonenumber" binding:"required,min=11"`
 	Currency    string `form:"currency" json:"currency" xml:"currency" binding:"required,oneof= USD GBP EUR CHF JPY TRY"`
 	Language    string `form:"language" json:"language" xml:"language" binding:"required,oneof= EN FR ES DE NL TR AR ZH"`
 	Password    string `form:"password" json:"password" xml:"password" binding:"required,min=7"`
@@ -37,6 +37,7 @@ func (server *Server) createClient(ctx *gin.Context) {
 		Language:    req.Language,
 		Password:    req.Password,
 		Time:        req.Time,
+		Currency:    req.Currency,
 	}
 	clent, err := server.store.CreateClient(ctx, arg)
 	if err != nil {
