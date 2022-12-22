@@ -21,3 +21,20 @@ type Client struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 	CreatedAt   time.Time `json:"created_at"`
 }
+
+type Translator struct {
+	ID                 int64       `json:"id"`
+	FirstName          string      `json:"first_name"`
+	SecondName         string      `json:"second_name"`
+	Email              string      `json:"email"`
+	Password           string      `json:"password"`
+	Profession         string      `json:"profession"`
+	TranslatorCategory string      `json:"translator_category"`
+	Rating             float64     `json:"rating"`
+	SourceLanguage     string      `json:"source_language"`
+	TargetLanguage     string      `json:"target_language"`
+	Certified          bool        `json:"certified"`
+	Timezone           interface{} `json:"timezone"`
+	CreatedAt          time.Time   `json:"created_at"`
+	UpdatedAt          time.Time   `json:"updated_at"`
+}

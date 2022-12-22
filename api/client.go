@@ -12,7 +12,7 @@ import (
 	db "github.com/obasootom/langtranslator/db/sqlc"
 )
 
-type Register struct {
+type RegisterClient struct {
 	Firstname   string `form:"firstname" json:"firstname" xml:"firstname"  binding:"required,alphanum"`
 	Secondname  string `form:"secondname" json:"secondname" xml:"secondname"  binding:"required,alphanum"`
 	Email       string `form:"email" json:"email" xml:"email"  binding:"required,email"`
@@ -25,7 +25,7 @@ type Register struct {
 
 func (server *Server) createClient(ctx *gin.Context) {
 
-	var req Register
+	var req RegisterClient
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -48,8 +48,8 @@ func (server *Server) createClient(ctx *gin.Context) {
 	clent, err := server.store.CreateClient(ctx, arg)
 	if err != nil {
 		if pkErr, ok := err.(*pq.Error); ok {
-			switch pkErr.Code {
-			case "unique violation":
+			switch pkErr.Code.Name(){
+			case "unique_violation":
 				ctx.JSON(http.StatusForbidden, errorResponse(err))
 				return
 			}
@@ -96,7 +96,7 @@ func NewClient(client db.Client) ClientResponse {
 	return clients
 }
 
-func (server Server) loginClient(ctx *gin.Context) {
+func (server *Server) loginClient(ctx *gin.Context) {
 	var req ClientRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))

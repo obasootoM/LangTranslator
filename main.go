@@ -41,7 +41,7 @@ func RunHttps(store db.Store, config config.Config) chan error {
 	}
 	runhttps := make(chan error)
 	go func() {
-		runhttps <- server.StartTls(":8000")
+		runhttps <- server.StartTls(config.HTTPS_ADDRESS)
 	}()
 	return runhttps
 }

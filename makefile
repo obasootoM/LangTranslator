@@ -30,4 +30,7 @@ certificate:
 main:
 	go run main.go
 
+pfx:
+	openssl pkcs12 -export -out domain.name.pfx -inkey domain.name.key -in domain.name.crt
+
 .PHONY: postgres migrate sqlc createdb dropdb migrateup migratedown test main

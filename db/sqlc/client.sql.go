@@ -11,7 +11,14 @@ import (
 
 const createClient = `-- name: CreateClient :one
 INSERT INTO client (
-  first_name,second_name,email,password,phone_number,language,currency,time
+  first_name,
+  second_name,
+  email,
+  password,
+  phone_number,
+  language,
+  currency,
+  time
 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 RETURNING id, first_name, second_name, email, phone_number, language, currency, time, password, updated_at, created_at
 `
