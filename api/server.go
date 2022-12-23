@@ -18,7 +18,8 @@ func NewServer(store *db.Store) (*Server,error) {
 
 	router.POST("/signup", server.createClient)
 	router.POST("/login", server.loginClient)
-	router.POST("/transLogin",server.createTranslator)
+	router.POST("/transignup",server.createTranslator)
+	router.POST("/translogin", server.loginTranslator)
 	server.router = router
 	return &server,nil
 }

@@ -14,30 +14,17 @@ INSERT INTO translator (
     first_name,
     second_name,
     email,
-    password,
-    profession,
-    translator_category,
-    rating, 
-    certified,
-    source_language,
-    target_language,
-    timezone)
-VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
-RETURNING id, first_name, second_name, email, password, profession, translator_category, rating, source_language, target_language, certified, timezone, created_at, updated_at
+    password
+    )
+VALUES($1,$2,$3,$4)
+RETURNING id, first_name, second_name, email, password, created_at, updated_at
 `
 
 type CreateTranslatorParams struct {
-	FirstName          string      `json:"first_name"`
-	SecondName         string      `json:"second_name"`
-	Email              string      `json:"email"`
-	Password           string      `json:"password"`
-	Profession         string      `json:"profession"`
-	TranslatorCategory string      `json:"translator_category"`
-	Rating             float64     `json:"rating"`
-	Certified          bool        `json:"certified"`
-	SourceLanguage     string      `json:"source_language"`
-	TargetLanguage     string      `json:"target_language"`
-	Timezone           interface{} `json:"timezone"`
+	FirstName  string `json:"first_name"`
+	SecondName string `json:"second_name"`
+	Email      string `json:"email"`
+	Password   string `json:"password"`
 }
 
 func (q *Queries) CreateTranslator(ctx context.Context, arg CreateTranslatorParams) (Translator, error) {
@@ -46,13 +33,6 @@ func (q *Queries) CreateTranslator(ctx context.Context, arg CreateTranslatorPara
 		arg.SecondName,
 		arg.Email,
 		arg.Password,
-		arg.Profession,
-		arg.TranslatorCategory,
-		arg.Rating,
-		arg.Certified,
-		arg.SourceLanguage,
-		arg.TargetLanguage,
-		arg.Timezone,
 	)
 	var i Translator
 	err := row.Scan(
@@ -61,13 +41,27 @@ func (q *Queries) CreateTranslator(ctx context.Context, arg CreateTranslatorPara
 		&i.SecondName,
 		&i.Email,
 		&i.Password,
-		&i.Profession,
-		&i.TranslatorCategory,
-		&i.Rating,
-		&i.SourceLanguage,
-		&i.TargetLanguage,
-		&i.Certified,
-		&i.Timezone,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getTranslator = `-- name: GetTranslator :one
+SELECT id, first_name, second_name, email, password, created_at, updated_at FROM translator 
+WHERE  email = $1
+LIMIT 1
+`
+
+func (q *Queries) GetTranslator(ctx context.Context, email string) (Translator, error) {
+	row := q.db.QueryRowContext(ctx, getTranslator, email)
+	var i Translator
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.SecondName,
+		&i.Email,
+		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

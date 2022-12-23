@@ -1,7 +1,9 @@
 package api
 
 import (
+	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
@@ -25,14 +27,14 @@ func (server *Server) createTranslator(ctx *gin.Context) {
 
 	hashpassword, err := config.Hashpassword(req.Password)
 	if err != nil {
-       ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-	   return
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
 	arg := db.CreateTranslatorParams{
-		FirstName:          req.FirstName,
-		SecondName:         req.SecondName,
-		Email:              req.Email,
-		Password:           hashpassword,
+		FirstName:  req.FirstName,
+		SecondName: req.SecondName,
+		Email:      req.Email,
+		Password:   hashpassword,
 	}
 
 	tranlator, err := server.store.CreateTranslator(ctx, arg)
@@ -48,4 +50,60 @@ func (server *Server) createTranslator(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, tranlator)
+}
+
+type TranslatorRequest struct {
+	Email    string `form:"email" xml:"email" json:"email" binding:"required,email"`
+	Password string `form:"password" xml:"password" json:"password" binding:"required,min=7"`
+}
+
+type TranslatorResponse struct {
+	ID         int       `form:"id" json:"id" xml:"id"`
+	FirstName  string    `form:"firstname" json:"firstname" xml:"firstname"  binding:"required,alphanum"`
+	SecondName string    `form:"secondname" json:"secondname" xml:"secondname"  binding:"required,alphanum"`
+	Email      string    `form:"email" json:"email" xml:"email"  binding:"required,email"`
+	Password   string    `form:"password" json:"password" xml:"password" binding:"required,min=7"`
+	CreatedAt  time.Time `form:"createdat" json:"createdat" xml:"createdat"`
+	UpdatedAt  time.Time `form:"updatedat" json:"updatedat" xml:"updatedat"`
+}
+
+type LoginTranslatorRequest struct {
+	Translator TranslatorResponse `form:"translator" json:"translator"`
+}
+
+func NewTranslator(trans db.Translator) TranslatorResponse {
+	translators := TranslatorResponse{
+		ID: int(trans.ID),
+		FirstName:  trans.FirstName,
+		SecondName: trans.SecondName,
+		Email:      trans.Email,
+		Password:   trans.Password,
+		CreatedAt:  trans.CreatedAt,
+		UpdatedAt:  trans.UpdatedAt,
+	}
+
+	return translators
+}
+
+func (server *Server) loginTranslator(ctx *gin.Context) {
+	var req TranslatorRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusForbidden, errorResponse(err))
+		return
+	}
+	trans, err := server.store.GetTranslator(ctx, req.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	arg := LoginTranslatorRequest{
+		Translator: NewTranslator(trans),
+	}
+	ctx.JSON(http.StatusOK, arg)
 }
