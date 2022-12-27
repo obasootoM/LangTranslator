@@ -14,24 +14,16 @@ INSERT INTO client (
   first_name,
   second_name,
   email,
-  password,
-  phone_number,
-  language,
-  currency,
-  time
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-RETURNING id, first_name, second_name, email, phone_number, language, currency, time, password, updated_at, created_at
+  password
+) VALUES ($1,$2,$3,$4)
+RETURNING id, first_name, second_name, email, password, updated_at, created_at
 `
 
 type CreateClientParams struct {
-	FirstName   string `json:"first_name"`
-	SecondName  string `json:"second_name"`
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-	PhoneNumber string `json:"phone_number"`
-	Language    string `json:"language"`
-	Currency    string `json:"currency"`
-	Time        string `json:"time"`
+	FirstName  string `json:"first_name"`
+	SecondName string `json:"second_name"`
+	Email      string `json:"email"`
+	Password   string `json:"password"`
 }
 
 func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Client, error) {
@@ -40,10 +32,6 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 		arg.SecondName,
 		arg.Email,
 		arg.Password,
-		arg.PhoneNumber,
-		arg.Language,
-		arg.Currency,
-		arg.Time,
 	)
 	var i Client
 	err := row.Scan(
@@ -51,10 +39,6 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 		&i.FirstName,
 		&i.SecondName,
 		&i.Email,
-		&i.PhoneNumber,
-		&i.Language,
-		&i.Currency,
-		&i.Time,
 		&i.Password,
 		&i.UpdatedAt,
 		&i.CreatedAt,
@@ -63,7 +47,7 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 }
 
 const getClient = `-- name: GetClient :one
-SELECT id, first_name, second_name, email, phone_number, language, currency, time, password, updated_at, created_at FROM client 
+SELECT id, first_name, second_name, email, password, updated_at, created_at FROM client 
 WHERE  email = $1
 LIMIT 1
 `
@@ -76,10 +60,6 @@ func (q *Queries) GetClient(ctx context.Context, email string) (Client, error) {
 		&i.FirstName,
 		&i.SecondName,
 		&i.Email,
-		&i.PhoneNumber,
-		&i.Language,
-		&i.Currency,
-		&i.Time,
 		&i.Password,
 		&i.UpdatedAt,
 		&i.CreatedAt,

@@ -10,19 +10,19 @@ type Server struct {
 	router *gin.Engine
 }
 
-func NewServer(store *db.Store) (*Server,error) {
+func NewServer(store *db.Store) (*Server, error) {
 	server := Server{
 		store: store,
 	}
 	router := gin.Default()
-
 	router.POST("/signup", server.createClient)
-	router.POST("/login", server.loginClient)
-	router.POST("/transignup",server.createTranslator)
 	router.POST("/translogin", server.loginTranslator)
+	router.POST("/login", server.loginClient)
+	router.POST("/transignup", server.createTranslator)
 	server.router = router
-	return &server,nil
+	return &server, nil
 }
+
 
 func errorResponse(err error) gin.H {
 	return gin.H{"err": err.Error()}
@@ -30,6 +30,6 @@ func errorResponse(err error) gin.H {
 func (server Server) StartTls(address string) error {
 	return server.router.RunTLS(address, "cert.pem", "key.pem")
 }
-func (server Server)  Start(address string) error {
+func (server Server) Start(address string) error {
 	return server.router.Run(address)
 }

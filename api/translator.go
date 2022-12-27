@@ -17,6 +17,23 @@ type RegisterTranslator struct {
 	Email      string `form:"email" json:"email" xml:"email"  binding:"required,email"`
 	Password   string `form:"password" json:"password" xml:"password" binding:"required,min=7"`
 }
+type TranslatorRegisterResponse struct {
+	FirstName  string    `form:"firstname" json:"firstname"`
+	SecondName string    `form:"firstname" json:"secondname"`
+	Email      string    `form:"email" json:"email"`
+	CreateAt   time.Time `from:"createat" json:"createat"`
+	UpdatedAt  time.Time `form:"updatedat" json:"updatedat"`
+}
+
+func NewTranslatorResponse(trans db.Translator) TranslatorRegisterResponse {
+	return TranslatorRegisterResponse{
+		FirstName:  trans.FirstName,
+		SecondName: trans.SecondName,
+		Email:      trans.Email,
+		CreateAt:   trans.CreatedAt,
+		UpdatedAt:  trans.UpdatedAt,
+	}
+}
 
 func (server *Server) createTranslator(ctx *gin.Context) {
 	var req RegisterTranslator
@@ -49,7 +66,8 @@ func (server *Server) createTranslator(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, tranlator)
+	resp := NewTranslatorResponse(tranlator)
+	ctx.JSON(http.StatusOK, resp)
 }
 
 type TranslatorRequest struct {
@@ -57,28 +75,17 @@ type TranslatorRequest struct {
 	Password string `form:"password" xml:"password" json:"password" binding:"required,min=7"`
 }
 
-type TranslatorResponse struct {
-	ID         int       `form:"id" json:"id" xml:"id"`
-	FirstName  string    `form:"firstname" json:"firstname" xml:"firstname"  binding:"required,alphanum"`
-	SecondName string    `form:"secondname" json:"secondname" xml:"secondname"  binding:"required,alphanum"`
-	Email      string    `form:"email" json:"email" xml:"email"  binding:"required,email"`
-	Password   string    `form:"password" json:"password" xml:"password" binding:"required,min=7"`
-	CreatedAt  time.Time `form:"createdat" json:"createdat" xml:"createdat"`
-	UpdatedAt  time.Time `form:"updatedat" json:"updatedat" xml:"updatedat"`
-}
-
 type LoginTranslatorRequest struct {
-	Translator TranslatorResponse `form:"translator" json:"translator"`
+	Translator TranslatorRegisterResponse `form:"translator" json:"translator"`
 }
 
-func NewTranslator(trans db.Translator) TranslatorResponse {
-	translators := TranslatorResponse{
-		ID: int(trans.ID),
+func NewTranslator(trans db.Translator) TranslatorRegisterResponse {
+	translators := TranslatorRegisterResponse{
+
 		FirstName:  trans.FirstName,
 		SecondName: trans.SecondName,
 		Email:      trans.Email,
-		Password:   trans.Password,
-		CreatedAt:  trans.CreatedAt,
+		CreateAt:   trans.CreatedAt,
 		UpdatedAt:  trans.UpdatedAt,
 	}
 
@@ -99,6 +106,11 @@ func (server *Server) loginTranslator(ctx *gin.Context) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	err = config.CheckPassword(req.Password, trans.Password)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 

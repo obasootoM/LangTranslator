@@ -13,14 +13,27 @@ import (
 )
 
 type RegisterClient struct {
-	Firstname   string `form:"firstname" json:"firstname" xml:"firstname"  binding:"required,alphanum"`
-	Secondname  string `form:"secondname" json:"secondname" xml:"secondname"  binding:"required,alphanum"`
-	Email       string `form:"email" json:"email" xml:"email"  binding:"required,email"`
-	PhoneNumber string `form:"phonenumber" json:"phonenumber" xml:"phonenumber" binding:"required,min=11"`
-	Currency    string `form:"currency" json:"currency" xml:"currency" binding:"required,oneof= USD GBP EUR CHF JPY TRY"`
-	Language    string `form:"language" json:"language" xml:"language" binding:"required,oneof= EN FR ES DE NL TR AR ZH"`
-	Password    string `form:"password" json:"password" xml:"password" binding:"required,min=7"`
-	Time        string `form:"time" json:"time" binding:"required"`
+	Firstname  string `form:"firstname" json:"firstname" xml:"firstname"  binding:"required,alphanum"`
+	Secondname string `form:"secondname" json:"secondname" xml:"secondname"  binding:"required,alphanum"`
+	Email      string `form:"email" json:"email" xml:"email"  binding:"required,email"`
+	Password   string `form:"password" json:"password" xml:"password" binding:"required,min=7"`
+}
+type RegisterResponse struct {
+	FirstName  string    `form:"firstname" json:"firstname"`
+	SecondName string    `form:"firstname" json:"secondname"`
+	Email      string    `form:"email" json:"email"`
+	CreateAt   time.Time `from:"createat" json:"createat"`
+	UpdatedAt  time.Time `form:"updatedat" json:"updatedat"`
+}
+
+func NewClientResponse(client db.Client) RegisterResponse {
+	return RegisterResponse{
+		FirstName:  client.FirstName,
+		SecondName: client.SecondName,
+		Email:      client.Email,
+		UpdatedAt:  client.UpdatedAt,
+		CreateAt:   client.CreatedAt,
+	}
 }
 
 func (server *Server) createClient(ctx *gin.Context) {
@@ -30,25 +43,21 @@ func (server *Server) createClient(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	hashpassword, err := config.Hashpassword(req.Password) 
+	hashpassword, err := config.Hashpassword(req.Password)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 	arg := db.CreateClientParams{
-		FirstName:   req.Firstname,
-		SecondName:  req.Secondname,
-		Email:       req.Email,
-		PhoneNumber: string(req.PhoneNumber),
-		Language:    req.Language,
-		Password:    hashpassword,
-		Time:        req.Time,
-		Currency:    req.Currency,
+		FirstName:  req.Firstname,
+		SecondName: req.Secondname,
+		Email:      req.Email,
+		Password:   hashpassword,
 	}
-	clent, err := server.store.CreateClient(ctx, arg)
+	clients, err := server.store.CreateClient(ctx, arg)
 	if err != nil {
 		if pkErr, ok := err.(*pq.Error); ok {
-			switch pkErr.Code.Name(){
+			switch pkErr.Code.Name() {
 			case "unique_violation":
 				ctx.JSON(http.StatusForbidden, errorResponse(err))
 				return
@@ -57,7 +66,8 @@ func (server *Server) createClient(ctx *gin.Context) {
 			return
 		}
 	}
-	ctx.JSON(http.StatusOK, clent)
+	resp := NewClientResponse(clients)
+	ctx.JSON(http.StatusOK, resp)
 }
 
 type ClientRequest struct {
@@ -65,33 +75,17 @@ type ClientRequest struct {
 	Password string `form:"password" json:"password" xml:"password" binding:"required,min=7"`
 }
 
-type ClientResponse struct {
-	FirstName   string    `form:"firstname" json:"firstname" xml:"firstname"  binding:"required,firstname"`
-	SecondName  string    `form:"secondname" json:"secondname" xml:"secondname"  binding:"required,secondname"`
-	Email       string    `form:"email" json:"email" xml:"email"  binding:"required,email"`
-	PhoneNumber string    `form:"phonenumber" xml:"phonenumber" binding:"required,min=11"`
-	Language    string    `form:"language" json:"language" xml:"language" binding:"required,language"`
-	Password    string    `form:"password" json:"password" xml:"password" binding:"required,min=7"`
-	Time        string    `json:"time" form:"time" binding:"required"`
-	UpdatedAt   time.Time `json:"updatedat"`
-	CreateAt    time.Time `json:"createdat"`
-}
-
 type LoginClientRequest struct {
-	Client ClientResponse `form:"client"`
+	Client RegisterResponse `form:"client"`
 }
 
-func NewClient(client db.Client) ClientResponse {
-	clients := ClientResponse{
-		FirstName:   client.FirstName,
-		SecondName:  client.SecondName,
-		Email:       client.Email,
-		Language:    client.Language,
-		PhoneNumber: client.PhoneNumber,
-		Password:    client.Password,
-		UpdatedAt:   client.UpdatedAt,
-		CreateAt:    client.CreatedAt,
-		Time:        client.Time,
+func NewClient(client db.Client) RegisterResponse {
+	clients := RegisterResponse{
+		FirstName:  client.FirstName,
+		SecondName: client.SecondName,
+		Email:      client.Email,
+		UpdatedAt:  client.UpdatedAt,
+		CreateAt:   client.CreatedAt,
 	}
 	return clients
 }
@@ -109,6 +103,11 @@ func (server *Server) loginClient(ctx *gin.Context) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	err = config.CheckPassword(req.Password, client.Password)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 
