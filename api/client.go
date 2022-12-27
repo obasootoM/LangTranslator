@@ -76,6 +76,7 @@ type ClientRequest struct {
 }
 
 type LoginClientRequest struct {
+	AccessToken string `form:"accesstoken" json:"accesstoken"`
 	Client RegisterResponse `form:"client"`
 }
 
@@ -110,9 +111,17 @@ func (server *Server) loginClient(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
+	accesstoken, err := server.token.CreateToken(req.Email,server.config.TokenDuration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
 
 	arg := LoginClientRequest{
 		Client: NewClient(client),
+		AccessToken: accesstoken,
 	}
 	ctx.JSON(http.StatusOK, arg)
 }
+
+

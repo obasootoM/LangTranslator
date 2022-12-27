@@ -76,6 +76,7 @@ type TranslatorRequest struct {
 }
 
 type LoginTranslatorRequest struct {
+	AccessToken string `form:"accesstoken" json:"accesstoken"`
 	Translator TranslatorRegisterResponse `form:"translator" json:"translator"`
 }
 
@@ -113,9 +114,15 @@ func (server *Server) loginTranslator(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
+	accessstoken, err := server.token.CreateToken(req.Email, server.config.TokenDuration)
+	if err !=nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
 
 	arg := LoginTranslatorRequest{
 		Translator: NewTranslator(trans),
+		AccessToken: accessstoken,
 	}
 	ctx.JSON(http.StatusOK, arg)
 }
