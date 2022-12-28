@@ -47,6 +47,16 @@ func (q *Queries) CreateTranslator(ctx context.Context, arg CreateTranslatorPara
 	return i, err
 }
 
+const deleteTranslator = `-- name: DeleteTranslator :exec
+DELETE FROM translator 
+ WHERE email = $1
+`
+
+func (q *Queries) DeleteTranslator(ctx context.Context, email string) error {
+	_, err := q.db.ExecContext(ctx, deleteTranslator, email)
+	return err
+}
+
 const getTranslator = `-- name: GetTranslator :one
 SELECT id, first_name, second_name, email, password, created_at, updated_at FROM translator 
 WHERE  email = $1

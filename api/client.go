@@ -125,3 +125,51 @@ func (server *Server) loginClient(ctx *gin.Context) {
 }
 
 
+type GetClientEmail struct {
+	Email string `form:"email" json:"email"`
+}
+
+func (server *Server) getClientEmail(ctx *gin.Context) {
+	var req GetClientEmail
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
+	getclientE ,err := server.store.GetClient(ctx, req.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+            ctx.JSON(http.StatusBadRequest, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK,getclientE)
+}
+
+type DeleteClient struct {
+	Email string `form:"email" json:"email"`
+}
+
+func (server *Server) deleteclient(ctx *gin.Context) {
+	var req DeleteClient
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
+	err := server.store.DeleteClient(ctx, req.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message":"successfully deleted",
+	})
+}
+
+

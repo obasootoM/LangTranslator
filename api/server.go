@@ -31,6 +31,10 @@ func NewServer(store *db.Store, config config.Config) (*Server, error) {
 	router.POST("/translogin", server.loginTranslator)
 	router.POST("/login", server.loginClient)
 	router.POST("/transignup", server.createTranslator)
+	router.GET("/trans/get", server.getTranslator)
+	router.GET("/client/get",server.getClientEmail)
+	router.DELETE("trans/delete",server.delete)
+	router.DELETE("/client/delete",server.deleteclient)
 	server.router = router
 	return &server, nil
 }

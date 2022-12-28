@@ -11,3 +11,7 @@ RETURNING *;
 SELECT * FROM client 
 WHERE  email = $1
 LIMIT 1;
+
+-- name: DeleteClient :exec
+DELETE FROM client 
+ WHERE email = $1;

@@ -10,7 +10,7 @@ import (
 	"github.com/obasootom/langtranslator/config"
 	db "github.com/obasootom/langtranslator/db/sqlc"
 )
-
+//translator signup
 type RegisterTranslator struct {
 	FirstName  string `form:"firstname" json:"firstname" xml:"firstname"  binding:"required,alphanum"`
 	SecondName string `form:"secondname" json:"secondname" xml:"secondname"  binding:"required,alphanum"`
@@ -76,8 +76,8 @@ type TranslatorRequest struct {
 }
 
 type LoginTranslatorRequest struct {
-	AccessToken string `form:"accesstoken" json:"accesstoken"`
-	Translator TranslatorRegisterResponse `form:"translator" json:"translator"`
+	AccessToken string                     `form:"accesstoken" json:"accesstoken"`
+	Translator  TranslatorRegisterResponse `form:"translator" json:"translator"`
 }
 
 func NewTranslator(trans db.Translator) TranslatorRegisterResponse {
@@ -92,7 +92,7 @@ func NewTranslator(trans db.Translator) TranslatorRegisterResponse {
 
 	return translators
 }
-
+//translator login
 func (server *Server) loginTranslator(ctx *gin.Context) {
 	var req TranslatorRequest
 
@@ -115,14 +115,70 @@ func (server *Server) loginTranslator(ctx *gin.Context) {
 		return
 	}
 	accessstoken, err := server.token.CreateToken(req.Email, server.config.TokenDuration)
-	if err !=nil {
+	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
 	arg := LoginTranslatorRequest{
-		Translator: NewTranslator(trans),
+		Translator:  NewTranslator(trans),
 		AccessToken: accessstoken,
 	}
 	ctx.JSON(http.StatusOK, arg)
+}
+//get translator by their email
+type GetEmailrequest struct {
+	Translator  TranslatorRegisterResponse `form:"translator" json:"translator"`
+}
+type GetEmail struct {
+	Email string `form:"email" json:"email"`
+}
+
+func (server *Server) getTranslator(ctx *gin.Context) {
+	var req GetEmail
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
+
+	getemail, err := server.store.GetTranslator(ctx, req.Email)
+	if err != nil {
+
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	arg := GetEmailrequest{
+		Translator: NewTranslator(getemail),
+	}
+	ctx.JSON(http.StatusOK, arg)
+}
+//delete translator
+type DeleteTrans struct {
+	Email string `form:"email" json:"email" `
+}
+
+func (server *Server) delete(ctx *gin.Context) {
+	var req DeleteTrans
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
+	err := server.store.DeleteTranslator(ctx, req.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "successfully delete",
+	})
+
 }
