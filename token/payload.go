@@ -7,7 +7,10 @@ import (
 	"github.com/google/uuid"
 )
 
-var ExpiredInvalidToken = errors.New("token as expired")
+var(
+	ErrInvalidToken = errors.New("invalid token")
+    ErrExpiredToken = errors.New("token as expired")
+) 
 
 type Payload struct {
 	ID        uuid.UUID `form:"id" json:"id"`
@@ -32,7 +35,7 @@ func NewPayload(username string, duration time.Duration) (*Payload, error) {
 
 func (payload *Payload) Valid() error {
 	if time.Now().After(payload.ExpiredAt) {
-		return ExpiredInvalidToken
+		return ErrInvalidToken
 	}
 	return nil
 }

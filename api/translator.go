@@ -6,11 +6,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"github.com/obasootom/langtranslator/config"
 	db "github.com/obasootom/langtranslator/db/sqlc"
 )
-//translator signup
+
+// translator signup
 type RegisterTranslator struct {
 	FirstName  string `form:"firstname" json:"firstname" xml:"firstname"  binding:"required,alphanum"`
 	SecondName string `form:"secondname" json:"secondname" xml:"secondname"  binding:"required,alphanum"`
@@ -75,9 +77,14 @@ type TranslatorRequest struct {
 	Password string `form:"password" xml:"password" json:"password" binding:"required,min=7"`
 }
 
-type LoginTranslatorRequest struct {
+type LoginTranslatorResponse struct {
+	SessionID   uuid.UUID                  `form:"session_id" json:"session_id"`
 	AccessToken string                     `form:"accesstoken" json:"accesstoken"`
 	Translator  TranslatorRegisterResponse `form:"translator" json:"translator"`
+	RefreshToken          string           `form:"refresh_token" json:"refresh_token"`
+	AccessTokenExpiredAt  time.Time        `form:"access_token_expired_at"`
+	RefreshtokenExpiredAt time.Time        `form:"refresh_token_expired_at" json:"refresh_token_expired_at"`
+
 }
 
 func NewTranslator(trans db.Translator) TranslatorRegisterResponse {
@@ -92,7 +99,8 @@ func NewTranslator(trans db.Translator) TranslatorRegisterResponse {
 
 	return translators
 }
-//translator login
+
+// translator login
 func (server *Server) loginTranslator(ctx *gin.Context) {
 	var req TranslatorRequest
 
@@ -114,21 +122,45 @@ func (server *Server) loginTranslator(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
-	accessstoken, err := server.token.CreateToken(req.Email, server.config.TokenDuration)
+	accessstoken, accessPayload, err := server.token.CreateToken(req.Email, server.config.TokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+	refreshToken, refreshPayload, err := server.token.CreateToken(req.Email, server.config.RefreshDuration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	session, err := server.store.CreateSession(ctx,db.CreateSessionParams{
+        ID: refreshPayload.ID,
+		Email: trans.Email,
+		RefreshToken: refreshToken,
+		UserAgent: "",
+		ClientIp: "",
+		IsBlocked: false,
+		ExpiresAt: refreshPayload.ExpiredAt,
 
-	arg := LoginTranslatorRequest{
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
+		return
+	}
+
+	arg := LoginTranslatorResponse{
+		SessionID: session.ID,
 		Translator:  NewTranslator(trans),
 		AccessToken: accessstoken,
+		RefreshtokenExpiredAt: accessPayload.ExpiredAt,
+		RefreshToken: refreshToken,
+		AccessTokenExpiredAt: accessPayload.ExpiredAt,
 	}
 	ctx.JSON(http.StatusOK, arg)
 }
-//get translator by their email
+
+// get translator by their email
 type GetEmailrequest struct {
-	Translator  TranslatorRegisterResponse `form:"translator" json:"translator"`
+	Translator TranslatorRegisterResponse `form:"translator" json:"translator"`
 }
 type GetEmail struct {
 	Email string `form:"email" json:"email"`
@@ -156,7 +188,8 @@ func (server *Server) getTranslator(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, arg)
 }
-//delete translator
+
+// delete translator
 type DeleteTrans struct {
 	Email string `form:"email" json:"email" `
 }

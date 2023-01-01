@@ -15,7 +15,7 @@ type PasetoMaker struct {
 
 func NewPasetoMaker(symetric string) (Maker, error) {
 	if len(symetric) != chacha20poly1305.KeySize {
-		return nil, fmt.Errorf("Invalid key size must be exactly %d symetric", chacha20poly1305.KeySize)
+		return nil, fmt.Errorf("invalid key size must be exactly %d symetric", chacha20poly1305.KeySize)
 	}
 	maker := &PasetoMaker{
 		paseto:   paseto.NewV2(),
@@ -25,12 +25,13 @@ func NewPasetoMaker(symetric string) (Maker, error) {
 }
 
 // CreateToken implements Maker
-func (paseto *PasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
+func (paseto *PasetoMaker) CreateToken(username string, duration time.Duration) (string,*Payload,error) {
 	payload, err := NewPayload(username, duration)
 	if err != nil {
-		return "", err
+		return "",payload, err
 	}
-	return paseto.paseto.Encrypt(paseto.symetric, payload, nil)
+	token,err := paseto.paseto.Encrypt(paseto.symetric, payload, nil)
+	return token, payload,err
 }
 
 // VerifyToken implements Maker

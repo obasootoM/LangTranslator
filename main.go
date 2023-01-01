@@ -21,6 +21,9 @@ func main() {
 	if err != nil {
 		log.Panic("cannot open database")
 	}
+	
+
+
 	store := db.NewStore(conn)
 	http := RunHttp(*store, config)
 	fmt.Println()
@@ -35,7 +38,7 @@ func main() {
 }
 
 func RunHttps(store db.Store, config config.Config) chan error {
-	server, err := api.NewServer(&store,config)
+	server, err := api.NewServer(&store, config)
 	if err != nil {
 		log.Panic("cannot create https server", err)
 	}
@@ -47,7 +50,7 @@ func RunHttps(store db.Store, config config.Config) chan error {
 }
 
 func RunHttp(store db.Store, config config.Config) chan error {
-	server, err := api.NewServer(&store,config)
+	server, err := api.NewServer(&store, config)
 	if err != nil {
 		log.Panic("cannot create http server", err)
 	}

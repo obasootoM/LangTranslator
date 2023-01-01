@@ -1,2 +1,4 @@
 DROP TABLE IF EXISTS client;
 DROP TABLE IF EXISTS translator;
+DROP TABLE IF EXISTS sessions;
+DROP TABLE IF EXISTS sessionsTrans;
