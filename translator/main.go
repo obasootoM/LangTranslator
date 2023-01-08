@@ -1,47 +1,26 @@
 package main
 
 import (
-	"crypto/tls"
 	"database/sql"
 	"fmt"
-	"net"
-	"net/smtp"
-
 	"log"
 
 	_ "github.com/lib/pq"
-	"github.com/obasootom/langtranslator/api"
-	"github.com/obasootom/langtranslator/config"
-	db "github.com/obasootom/langtranslator/db/sqlc"
+	"github.com/obasootom/langtranslator/translator/api"
+	"github.com/obasootom/langtranslator/translator/config"
+	db "github.com/obasootom/langtranslator/translator/db/sqlc"
 )
 
 func main() {
-	config, err := config.LoadConfigClient(".")
+	config, err := config.LoadConfigTranslator("..")
 	if err != nil {
 		return
 	}
-	conn, err := sql.Open(config.DB_DRIVER, config.DB_SOURCE_CLIENT)
+	conn, err := sql.Open(config.DB_DRIVER, config.DB_SOURCE_TRANSLATOR)
 	if err != nil {
 		log.Panic("cannot open database")
 	}
-//smtp mailing
-   con, err := net.Dial("tcp",":465")
-   if err != nil {
-        fmt.Println("cannot secure a conection",err)
-   }
-   client ,err := smtp.NewClient(con,"smtp.gmail.com")
-   if err != nil {
-	fmt.Println("cannot create new client", err)
-   }
-   tls := &tls.Config{
-	ServerName: "smtp.gmail.com",
-   }
-   err = client.StartTLS(tls)
-   if err != nil {
-	fmt.Println("err",err)
-   }
-   //
-   
+
 	store := db.NewStore(conn)
 	http := RunHttp(*store, config)
 	fmt.Println()
@@ -52,9 +31,8 @@ func main() {
 	case err := <-https:
 		log.Panic("cannot load https", err)
 	}
-
 }
-//https api
+
 func RunHttps(store db.Store, config config.Config) chan error {
 	server, err := api.NewServer(&store, config)
 	if err != nil {
@@ -62,11 +40,11 @@ func RunHttps(store db.Store, config config.Config) chan error {
 	}
 	runhttps := make(chan error)
 	go func() {
-		runhttps <- server.StartTls(config.HTTPS_ADDRESS_CLIENT)
+		runhttps <- server.StartTls(config.HTTPS_ADDRESS_TRANSLATOR)
 	}()
 	return runhttps
 }
-//http api
+
 func RunHttp(store db.Store, config config.Config) chan error {
 	server, err := api.NewServer(&store, config)
 	if err != nil {
@@ -74,7 +52,7 @@ func RunHttp(store db.Store, config config.Config) chan error {
 	}
 	runhttp := make(chan error)
 	go func() {
-		runhttp <- server.Start(config.HTTP_ADDRESS_CLIENT)
+		runhttp <- server.Start(config.HTTP_ADDRESS_TRANSLATOR)
 	}()
 	return runhttp
 }

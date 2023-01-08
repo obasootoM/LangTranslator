@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"github.com/obasootom/langtranslator/config"
-	db "github.com/obasootom/langtranslator/db/sqlc"
+	db "github.com/obasootom/langtranslator/translator/db/sqlc"
 )
 
 // translator signup
@@ -137,7 +137,6 @@ func (server *Server) loginTranslator(ctx *gin.Context) {
 		Email: trans.Email,
 		RefreshToken: refreshToken,
 		UserAgent: "",
-		ClientIp: "",
 		IsBlocked: false,
 		ExpiresAt: refreshPayload.ExpiredAt,
 
@@ -214,4 +213,30 @@ func (server *Server) delete(ctx *gin.Context) {
 		"message": "successfully delete",
 	})
 
+}
+
+
+func (server *Server) logout(ctx *gin.Context) {
+	var req LoginTranslatorResponse
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
+	session, err := server.store.GetSession(ctx, req.SessionID)
+	if err !=nil {
+		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
+		return
+	}
+	err = server.store.UpdateSession(ctx, db.UpdateSessionParams{
+		ID: session.ID,
+		IsBlocked: true,
+	})
+	if err != nil{
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message":"successfully logged out",
+	})
+	
 }

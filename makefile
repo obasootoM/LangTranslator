@@ -1,5 +1,8 @@
-postgres:
+postgresClient:
 	sudo docker run --name=root -p 8001:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=postgres -d postgres:11-alpine
+
+postgrestransl:
+	sudo docker run --name=root12 -p 8002:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=postgres -d postgres:12-alpine
 
 migrate:
 	migrate create -ext sql -dir db/migration -seq init_schema  
@@ -7,7 +10,7 @@ migrate:
 sqlc:
 	sqlc generate	
 
-createdb:
+createdb:                
 	sudo docker exec -it root createdb --username=root --owner=root client
 
 dropdb:
@@ -33,4 +36,4 @@ main:
 pfx:
 	openssl pkcs12 -export -out domain.name.pfx -inkey domain.name.key -in domain.name.crt
 
-.PHONY: postgres migrate sqlc createdb dropdb migrateup migratedown test main
+.PHONY: postgres migrate sqlc createdb dropdb migrateup migratedown test main postgrestransl

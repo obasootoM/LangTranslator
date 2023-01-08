@@ -16,4 +16,3 @@ LIMIT 1;
 -- name: DeleteTranslator :exec
 DELETE FROM translator 
  WHERE email = $1;
-

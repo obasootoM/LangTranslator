@@ -2,10 +2,9 @@ package api
 
 import (
 	"fmt"
-
 	"github.com/gin-gonic/gin"
-	"github.com/obasootom/langtranslator/config"
-	db "github.com/obasootom/langtranslator/db/sqlc"
+	"github.com/obasootom/langtranslator/translator/config"
+	db "github.com/obasootom/langtranslator/translator/db/sqlc"
 	"github.com/obasootom/langtranslator/token"
 )
 
@@ -15,7 +14,7 @@ type Server struct {
 	token  token.Maker
 	config config.Config
 }
-
+ 
 func NewServer(store *db.Store, config config.Config) (*Server, error) {
 	token, err := token.NewPasetoMaker(config.TokenSymetricKey)
 	if err != nil {
@@ -27,19 +26,17 @@ func NewServer(store *db.Store, config config.Config) (*Server, error) {
 		token:  token,
 	}
 	router := gin.Default()
-
+   
 	fmt.Printf("err %v", err)
-	router.POST("/signup", server.createClient)
-	router.POST("/login", server.loginClient)
-	router.GET("/client/get", server.getClientEmail)
-	router.DELETE("/client/delete", server.deleteclient)
-	router.GET("logout", server.logout)
-	router.POST("/profile", server.createProfile)
-
+	router.POST("/translogin", server.loginTranslator)
+	router.POST("/transignup", server.createTranslator)
+	router.GET("/trans/get", server.getTranslator)
+	router.DELETE("trans/delete", server.delete)
+	router.GET("/logout", server.logout)
 	auth := router.Group("/admin", gin.BasicAuth(gin.Accounts{
 		"obas": "123456789",
 	}))
-	auth.GET("/client/get", server.getClientEmail)
+	auth.GET("trans/get", server.getTranslator)
 	server.router = router
 	return &server, nil
 }

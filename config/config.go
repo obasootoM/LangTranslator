@@ -7,17 +7,17 @@ import (
 )
 
 type Config struct {
-	DB_DRIVER        string        `mapstructure:"DB_DRIVER"`
-	DB_SOURCE        string        `mapstructure:"DB_SOURCE"`
-	HTTPS_ADDRESS    string        `mapstructure:"HTTPS_ADDRESS"`
-	HTTP_ADDRESS     string        `mapstructure:"HTTP_ADDRESS"`
-	TokenSymetricKey string        `mapstructure:"TOKEN_SYMETRIC_KEY"`
-	TokenDuration    time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
-	RefreshDuration  time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
-	Smtp_address     string        `map:"SMTP_ADDRESS"`
+	DB_DRIVER            string        `mapstructure:"DB_DRIVER"`
+	DB_SOURCE_CLIENT     string        `mapstructure:"DB_SOURCE_CLIENT"`
+	HTTPS_ADDRESS_CLIENT string        `mapstructure:"HTTPS_ADDRESS_CLIENT"`
+	HTTP_ADDRESS_CLIENT  string        `mapstructure:"HTTP_ADDRESS_CLIENT"`
+	SMTP_ADDRESS         string        `mapstructure:"SMTP_ADDRESS"`
+	TokenSymetricKey     string        `mapstructure:"TOKEN_SYMETRIC_KEY"`
+	TokenDuration        time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	RefreshDuration      time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
 }
 
-func LoadConfig(path string) (config Config, err error) {
+func LoadConfigClient(path string) (config Config, err error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigName("app")
 	viper.SetConfigType("env")

@@ -20,6 +20,17 @@ type Client struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
+type Profile struct {
+	ID             int64  `json:"id"`
+	Name           string `json:"name"`
+	Gender         string `json:"gender"`
+	PhoneNumber    string `json:"phone_number"`
+	Email          string `json:"email"`
+	AddressLine    string `json:"address_line"`
+	Country        string `json:"country"`
+	NativeLanguage string `json:"native_language"`
+}
+
 type Session struct {
 	ID           uuid.UUID `json:"id"`
 	Email        string    `json:"email"`
@@ -29,25 +40,4 @@ type Session struct {
 	IsBlocked    bool      `json:"is_blocked"`
 	ExpiresAt    time.Time `json:"expires_at"`
 	CreatedAt    time.Time `json:"created_at"`
-}
-
-type Sessionstran struct {
-	ID           uuid.UUID `json:"id"`
-	Email        string    `json:"email"`
-	RefreshToken string    `json:"refresh_token"`
-	UserAgent    string    `json:"user_agent"`
-	TranslatorIp string    `json:"translator_ip"`
-	IsBlocked    bool      `json:"is_blocked"`
-	ExpiresAt    time.Time `json:"expires_at"`
-	CreatedAt    time.Time `json:"created_at"`
-}
-
-type Translator struct {
-	ID         int64     `json:"id"`
-	FirstName  string    `json:"first_name"`
-	SecondName string    `json:"second_name"`
-	Email      string    `json:"email"`
-	Password   string    `json:"password"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
 }
