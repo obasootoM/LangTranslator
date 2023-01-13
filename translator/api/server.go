@@ -27,12 +27,11 @@ func NewServer(store *db.Store, config config.Config) (*Server, error) {
 	}
 	router := gin.Default()
    
-	fmt.Printf("err %v", err)
-	router.POST("/translogin", server.loginTranslator)
-	router.POST("/transignup", server.createTranslator)
+	router.POST("/trans/translogin", server.loginTranslator)
+	router.POST("/trans/transignup", server.createTranslator)
 	router.GET("/trans/get", server.getTranslator)
-	router.DELETE("trans/delete", server.delete)
-	router.GET("/logout", server.logout)
+	router.DELETE("/trans/delete", server.delete)
+	router.GET("/trans/logout", server.logout)
 	auth := router.Group("/admin", gin.BasicAuth(gin.Accounts{
 		"obas": "123456789",
 	}))

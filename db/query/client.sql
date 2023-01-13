@@ -15,3 +15,8 @@ LIMIT 1;
 -- name: DeleteClient :exec
 DELETE FROM client 
  WHERE email = $1;
+
+-- name: UpdateClient :exec
+UPDATE client 
+set password = $2
+WHERE email = $1;

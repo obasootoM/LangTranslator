@@ -11,7 +11,6 @@ import (
 
 const createProfile = `-- name: CreateProfile :one
 INSERT INTO profile (
-  id,
   name,
   gender,
   email,
@@ -19,12 +18,11 @@ INSERT INTO profile (
   address_line,
   country,
   native_language
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-RETURNING id, name, gender, phone_number, email, address_line, country, native_language
+) VALUES ($1,$2,$3,$4,$5,$6,$7)
+RETURNING id, name, gender, phone_number, email, address_line, country, native_language, created_at
 `
 
 type CreateProfileParams struct {
-	ID             int64  `json:"id"`
 	Name           string `json:"name"`
 	Gender         string `json:"gender"`
 	Email          string `json:"email"`
@@ -36,7 +34,6 @@ type CreateProfileParams struct {
 
 func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) (Profile, error) {
 	row := q.db.QueryRowContext(ctx, createProfile,
-		arg.ID,
 		arg.Name,
 		arg.Gender,
 		arg.Email,
@@ -55,6 +52,122 @@ func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) (P
 		&i.AddressLine,
 		&i.Country,
 		&i.NativeLanguage,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getProfile = `-- name: GetProfile :one
+SELECT id, name, gender, phone_number, email, address_line, country, native_language, created_at FROM profile 
+WHERE  email = $1
+LIMIT 1
+`
+
+func (q *Queries) GetProfile(ctx context.Context, email string) (Profile, error) {
+	row := q.db.QueryRowContext(ctx, getProfile, email)
+	var i Profile
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Gender,
+		&i.PhoneNumber,
+		&i.Email,
+		&i.AddressLine,
+		&i.Country,
+		&i.NativeLanguage,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const listProfile = `-- name: ListProfile :many
+SELECT id, name, gender, phone_number, email, address_line, country, native_language, created_at FROM profile
+ORDER BY id
+LIMIT $1
+OFFSET $2
+`
+
+type ListProfileParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListProfile(ctx context.Context, arg ListProfileParams) ([]Profile, error) {
+	rows, err := q.db.QueryContext(ctx, listProfile, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Profile
+	for rows.Next() {
+		var i Profile
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Gender,
+			&i.PhoneNumber,
+			&i.Email,
+			&i.AddressLine,
+			&i.Country,
+			&i.NativeLanguage,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateProfile = `-- name: UpdateProfile :one
+UPDATE profile 
+  set name =$7,
+  address_line = $6,
+  gender = $5,
+  email = $4,
+  phone_number = $3,
+  country = $2 
+WHERE id = $1
+RETURNING id, name, gender, phone_number, email, address_line, country, native_language, created_at
+`
+
+type UpdateProfileParams struct {
+	ID          int64  `json:"id"`
+	Country     string `json:"country"`
+	PhoneNumber string `json:"phone_number"`
+	Email       string `json:"email"`
+	Gender      string `json:"gender"`
+	AddressLine string `json:"address_line"`
+	Name        string `json:"name"`
+}
+
+func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error) {
+	row := q.db.QueryRowContext(ctx, updateProfile,
+		arg.ID,
+		arg.Country,
+		arg.PhoneNumber,
+		arg.Email,
+		arg.Gender,
+		arg.AddressLine,
+		arg.Name,
+	)
+	var i Profile
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Gender,
+		&i.PhoneNumber,
+		&i.Email,
+		&i.AddressLine,
+		&i.Country,
+		&i.NativeLanguage,
+		&i.CreatedAt,
 	)
 	return i, err
 }

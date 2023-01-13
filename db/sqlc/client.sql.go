@@ -76,3 +76,19 @@ func (q *Queries) GetClient(ctx context.Context, email string) (Client, error) {
 	)
 	return i, err
 }
+
+const updateClient = `-- name: UpdateClient :exec
+UPDATE client 
+set password = $2
+WHERE email = $1
+`
+
+type UpdateClientParams struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (q *Queries) UpdateClient(ctx context.Context, arg UpdateClientParams) error {
+	_, err := q.db.ExecContext(ctx, updateClient, arg.Email, arg.Password)
+	return err
+}

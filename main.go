@@ -1,12 +1,9 @@
 package main
 
 import (
-	"crypto/tls"
+
 	"database/sql"
 	"fmt"
-	"net"
-	"net/smtp"
-
 	"log"
 
 	_ "github.com/lib/pq"
@@ -24,23 +21,7 @@ func main() {
 	if err != nil {
 		log.Panic("cannot open database")
 	}
-//smtp mailing
-   con, err := net.Dial("tcp",":465")
-   if err != nil {
-        fmt.Println("cannot secure a conection",err)
-   }
-   client ,err := smtp.NewClient(con,"smtp.gmail.com")
-   if err != nil {
-	fmt.Println("cannot create new client", err)
-   }
-   tls := &tls.Config{
-	ServerName: "smtp.gmail.com",
-   }
-   err = client.StartTLS(tls)
-   if err != nil {
-	fmt.Println("err",err)
-   }
-   //
+
    
 	store := db.NewStore(conn)
 	http := RunHttp(*store, config)

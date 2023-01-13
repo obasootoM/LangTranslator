@@ -2,9 +2,9 @@ package api
 
 import (
 	"database/sql"
-	_"log"
+	_ "log"
 	"net/http"
-	_"net/smtp"
+	_ "net/smtp"
 
 	"time"
 
@@ -70,17 +70,7 @@ func (server *Server) createClient(ctx *gin.Context) {
 		}
 	}
 
-    resp := NewClientResponse(clients)
-	// auth := smtp.PlainAuth("", clients.Email, clients.Password, "smtp.gmail.com")
-	// to := []string{"admin@gmail.com"}
-	// msg := []byte("To: admin@gmail.com\r\n" +
-	// 	"Subject: New Client Signup\r\n" +
-	// 	"\r\n" +
-	// 	"A new client has signed up for the service.\r\n")
-	// err = smtp.SendMail("smtp.gmail.com:587", auth, clients.Email, to, msg)
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
+	resp := NewClientResponse(clients)
 
 	ctx.JSON(http.StatusOK, resp)
 }
@@ -149,16 +139,16 @@ func (server *Server) loginClient(ctx *gin.Context) {
 		ClientIp:     "",
 		ExpiresAt:    refreshPayload.ExpiredAt,
 	})
-	if err != nil{
-		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 	arg := LoginClientResponse{
-		SessionID:    session.ID,
-		Client:       NewClient(clients),
-		AccessToken:  accesstoken,
-		RefreshToken: refreshToken,
-		AccessTokenExpiredAt: accessPayload.ExpiredAt,
+		SessionID:             session.ID,
+		Client:                NewClient(clients),
+		AccessToken:           accesstoken,
+		RefreshToken:          refreshToken,
+		AccessTokenExpiredAt:  accessPayload.ExpiredAt,
 		RefreshtokenExpiredAt: refreshPayload.ExpiredAt,
 	}
 	ctx.JSON(http.StatusOK, arg)
@@ -166,13 +156,12 @@ func (server *Server) loginClient(ctx *gin.Context) {
 
 type GetClientEmail struct {
 	Email string `form:"email" json:"email"`
-	
 }
 
 func (server *Server) getClientEmail(ctx *gin.Context) {
 	var req GetClientEmail
 
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusNotFound, errorResponse(err))
 		return
 	}
@@ -213,8 +202,6 @@ func (server *Server) deleteclient(ctx *gin.Context) {
 
 }
 
-
-
 func (server *Server) logout(ctx *gin.Context) {
 	var req LoginClientResponse
 
@@ -223,19 +210,54 @@ func (server *Server) logout(ctx *gin.Context) {
 		return
 	}
 	get, err := server.store.GetSession(ctx, req.SessionID)
-    if err != nil {
-		ctx.JSON(http.StatusBadRequest,errorResponse(err))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	 err = server.store.UpdateSession(ctx, db.UpdateSessionParams{
-		ID: get.ID,
+	err = server.store.UpdateSession(ctx, db.UpdateSessionParams{
+		ID:        get.ID,
 		IsBlocked: true,
-	 })
-	 if err != nil {
-		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
-	 }
-	 ctx.JSON(http.StatusOK, gin.H{
-		"mesage":"successfully logout",
-	 })
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"mesage": "successfully logout",
+	})
+}
+
+type ChangePassword struct {
+	Email    string `json:"email" form:"email"`
+	Password string `json:"password" form:"password"`
+}
+
+func (server *Server) changePassword(ctx *gin.Context) {
+	var req ChangePassword
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
+	hashpassword, err := config.Hashpassword(req.Password)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	get, err := server.store.GetClient(ctx, req.Email)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	arg := db.UpdateClientParams{
+		Email:    get.Email,
+		Password: hashpassword,
+	}
+	err = server.store.UpdateClient(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "password updated",
+	})
 }

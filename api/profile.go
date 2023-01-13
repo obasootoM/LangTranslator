@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
@@ -47,4 +48,51 @@ func (server *Server) createProfile(ctx *gin.Context) {
 		}
 	}
 	ctx.JSON(http.StatusOK, profile)
+}
+
+type ListProfile struct {
+	PageId   int32 `form:"page_id" json:"page_id" binding:"required,min=1"`
+	PageSize int32 `form:"page_size" json:"page_size" binding:"required,min=5,max=10"`
+}
+type ProfileResponse struct {
+	Name        string    `form:"name"`
+	Email       string    `form:"email"`
+	PhoneNumber string    `form:"phone_number"`
+	Time        time.Time `form:"time"`
+}
+// type ProfileRequest struct {
+// 	profile  ProfileResponse
+// }
+func NewProfile(profile db.Profile) ProfileResponse {
+	profiles := ProfileResponse{
+		Name:        profile.Name,
+		Email:       profile.Email,
+		PhoneNumber: profile.PhoneNumber,
+		Time:        profile.CreatedAt,
+	}
+	return profiles
+}
+
+func (server *Server) listProfile(ctx *gin.Context) {
+	var req ListProfile
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
+	arg := db.ListProfileParams{
+		Limit:  req.PageSize,
+		Offset: (req.PageId - 1) * req.PageSize,
+	}
+
+	list, err := server.store.ListProfile(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+    // profiles := ProfileRequest{
+    //     profile: NewProfile(list[]),
+	// }
+
+	ctx.JSON(http.StatusOK, list)
 }

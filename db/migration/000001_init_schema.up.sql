@@ -28,7 +28,25 @@ CREATE TABLE "profile" (
   "email" varchar UNIQUE NOT NULL,
   "address_line" varchar NOT NULL,
   "country" varchar NOT NULL,
-  "native_language" varchar NOT NULL
+  "native_language" varchar NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT (now())
 ); 
 
 ALTER TABLE "profile" ADD FOREIGN KEY ("email") REFERENCES "client" ("email");
+
+CREATE TABLE "orders" (
+  "id" bigserial PRIMARY KEY, 
+  "source_language" varchar NOT NULL, 
+  "target_language" varchar NOT NULL,  
+  "translator" varchar NOT NULL, 
+  "proof_reader" varchar NOT NULL, 
+  "translation_delivary_date" varchar NOT NULL, 
+  "proof_reading_delivary_date" varchar NOT NULL,  
+  "project_end_date" varchar NOT NULL,  
+  "service_level" varchar NOT NULL,  
+  "profession" varchar NOT NULL,  
+  "translator_category" varchar NOT NULL,  
+  "delivary_speed" varchar NOT NULL, 
+  "translator_request" varchar NOT NULL,  
+  "delivary_address" varchar NOT NULL
+);

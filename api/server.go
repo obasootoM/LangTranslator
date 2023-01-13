@@ -27,19 +27,17 @@ func NewServer(store *db.Store, config config.Config) (*Server, error) {
 		token:  token,
 	}
 	router := gin.Default()
-
-	fmt.Printf("err %v", err)
-	router.POST("/signup", server.createClient)
-	router.POST("/login", server.loginClient)
-	router.GET("/client/get", server.getClientEmail)
-	router.DELETE("/client/delete", server.deleteclient)
-	router.GET("logout", server.logout)
-	router.POST("/profile", server.createProfile)
-
-	auth := router.Group("/admin", gin.BasicAuth(gin.Accounts{
-		"obas": "123456789",
-	}))
+	router.POST("/client/signup", server.createClient)
+	router.POST("/client/login", server.loginClient)
+	router.POST("/client/profile", server.createProfile)
+	router.POST("/client/chanPassword", server.changePassword)
+	auth := router.Group("/admin")
 	auth.GET("/client/get", server.getClientEmail)
+	auth.DELETE("/client/delete", server.deleteclient)
+	router.GET("/client/logout", server.logout)
+	auth.GET("/client/list", server.listProfile)
+	auth.POST("/client/order", server.createOrder)
+
 	server.router = router
 	return &server, nil
 }

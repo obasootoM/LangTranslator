@@ -36,4 +36,10 @@ main:
 pfx:
 	openssl pkcs12 -export -out domain.name.pfx -inkey domain.name.key -in domain.name.crt
 
-.PHONY: postgres migrate sqlc createdb dropdb migrateup migratedown test main postgrestransl
+key:
+	openssl rand -hex 64	
+
+keys:
+	openssl rand -hex 64 | head -c 32
+
+.PHONY: postgres migrate sqlc createdb dropdb migrateup migratedown test main postgrestransl key keys
