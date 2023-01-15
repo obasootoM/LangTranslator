@@ -17,11 +17,11 @@ dropdb:
 	sudo docker exec -it root dropdb client	
 
 migrateup:
-	migrate -path db/migration -database "postgresql://root:postgres@localhost:8001/client?sslmode=disable" -verbose up 	
+	migrate -path db/migration -database "postgresql://root:postgres@localhost:5432/client?sslmode=disable" -verbose up 	
 
 
 migratedown:
-	migrate -path db/migration -database "postgresql://root:postgres@localhost:8001/client?sslmode=disable" -verbose down
+	migrate -path db/migration -database "postgresql://root:postgres@localhost:5432/client?sslmode=disable" -verbose down
 
 test:
 	go test -v ./...
@@ -32,6 +32,9 @@ certificate:
 
 main:
 	go run main.go
+
+dockerRun:
+	sudo docker run --name client --network client-network -e GIN_MODE=release -p 8000:8000 -e DB_SOURCE_CLIENT="postgresql://root:postgres@root:5432/client?sslmode=disable" client:latest	
 
 pfx:
 	openssl pkcs12 -export -out domain.name.pfx -inkey domain.name.key -in domain.name.crt

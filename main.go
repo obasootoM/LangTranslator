@@ -26,12 +26,12 @@ func main() {
 	store := db.NewStore(conn)
 	http := RunHttp(*store, config)
 	fmt.Println()
-	https := RunHttps(*store, config)
+	//https := RunHttps(*store, config)
 	select {
 	case err := <-http:
 		log.Panic("cannot load http", err)
-	case err := <-https:
-		log.Panic("cannot load https", err)
+	// case err := <-https:
+	// 	log.Panic("cannot load https", err)
 	}
 
 }
