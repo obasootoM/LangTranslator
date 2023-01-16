@@ -1,5 +1,8 @@
 {
     "yaml.schemas": {
-        "https://json.schemastore.org/github-workflow.json": "file:///home/user/LangTranslator/.github/workflows/deploy.yml"
+        "https://json.schemastore.org/github-workflow.json": [
+            "file:///home/user/LangTranslator/.github/workflows/deploy.yml",
+            "file:///home/user/LangTranslator/.github/workflows/ci.yml"
+        ]
     }
 }
