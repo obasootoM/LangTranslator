@@ -1,4 +1,4 @@
-name: Deployment
+name: Deploy to production
 
 
 on:
@@ -15,8 +15,8 @@ jobs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ aws-access-key-id }}
-        aws-secret-access-key: ${{ aws-secret-access-key }}
+        aws-access-key-id: ${{ AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
 
@@ -26,9 +26,8 @@ jobs:
 
     - name: Build, tag, and push docker image to Amazon ECR Public
       env:   
-        REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
-        REGISTRY_ALIAS: my-ecr-public-registry-alias
-        REPOSITORY: my-ecr-public-repo
+        ECR_REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}  
+        ECR_REPOSITORY: clientdockerimage
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
