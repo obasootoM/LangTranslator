@@ -5,7 +5,6 @@ on:
     branches: ["master"]
 
 
-
 jobs:
   build:
     name: Build image
@@ -33,3 +32,6 @@ jobs:
         docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG 
         
+    
+
+    
