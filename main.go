@@ -17,7 +17,7 @@ func main() {
 	if err != nil {
 		return
 	}
-	conn, err := sql.Open(config.DB_DRIVER, config.DB_SOURCE_CLIENT)
+	conn, err := sql.Open(config.DB_DRIVER, config.DB_SOURCE)
 	if err != nil {
 		log.Panic("cannot open database")
 	}
