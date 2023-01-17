@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	DB_DRIVER            string        `mapstructure:"DB_DRIVER"`
-	DB_SOURCE            string        `mapstructure:"DB_SOURCE_CLIENT"`
+	DB_SOURCE            string        `mapstructure:"DB_SOURCE"`
 	HTTPS_ADDRESS_CLIENT string        `mapstructure:"HTTPS_ADDRESS_CLIENT"`
 	HTTP_ADDRESS_CLIENT  string        `mapstructure:"HTTP_ADDRESS_CLIENT"`
 	SMTP_ADDRESS         string        `mapstructure:"SMTP_ADDRESS"`
