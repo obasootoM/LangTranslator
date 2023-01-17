@@ -7,11 +7,11 @@ RUN apk add curl
 RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz
 
 #run stage
-FROM alpine
+FROM alpine:3.15
 WORKDIR /app
 COPY  --from=builder /app/main .
 COPY  --from=builder /app/migrate ./migrate
-COPY  app.env .
+COPY app.env .
 COPY start.sh .
 COPY db/migration ./migration
 COPY wait-for.sh .
