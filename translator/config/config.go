@@ -6,20 +6,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-
-
-
-
 type Config struct {
-	DB_DRIVER                string        `mapstructure:"DB_DRIVER"`
-	DB_SOURCE_TRANSLATOR     string        `mapstructure:"DB_SOURCE_TRANSLATOR"`
-	HTTP_ADDRESS_TRANSLATOR  string        `mapstructure:"HTTP_ADDRESS_TRANSLATOR"`
-	TokenSymetricKey         string        `mapstructure:"TOKEN_SYMETRIC_KEY"`
-	TokenDuration            time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
-	RefreshDuration          time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
-	HTTPS_ADDRESS_TRANSLATOR string        `mapstructure:"HTTPS_ADDRESS_TRANSLATOR"`
+	DB_DRIVER          string        `mapstructure:"DB_DRIVER"`
+	DB_SOURCE          string        `mapstructure:"DB_SOURCE"`
+	HTTP_ADDRESS_TRANS string        `mapstructure:"HTTP_ADDRESS_TRANS"`
+	TokenSymetricKey   string        `mapstructure:"TOKEN_SYMETRIC_KEY"`
+	TokenDuration      time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	RefreshDuration    time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
 }
-
 
 func LoadConfigTranslator(path string) (con Config, err error) {
 	viper.AddConfigPath(path)
