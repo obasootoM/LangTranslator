@@ -46,6 +46,6 @@ func errorResponse(err error) gin.H {
 func (server Server) StartTls(address string) error {
 	return server.router.RunTLS(address, "cert.pem", "key.pem")
 }
-func (server Server) Start(address string) error {
+func (server Server) Startl(address string) error {
 	return server.router.Run(address)
 }
