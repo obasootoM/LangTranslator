@@ -15,7 +15,7 @@ spec:
         app: lang-trans-api
     spec:
       containers:
-        - name: lang-trans-api
-          image: 190661032801.dkr.ecr.us-east-1.amazonaws.com/client:b0999dc3b40e6cdf7cc32aea50fa40e961119116
-          ports:
-            - containerPort: 8000
+      - name: lang-trans-api
+        image: 190661032801.dkr.ecr.us-east-1.amazonaws.com/client:b0999dc3b40e6cdf7cc32aea50fa40e961119116
+        ports:
+        - containerPort: 8000
