@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+	"mime/multipart"
 	"net/http"
 	"time"
 
@@ -60,9 +62,10 @@ type ProfileResponse struct {
 	PhoneNumber string    `form:"phone_number"`
 	Time        time.Time `form:"time"`
 }
-// type ProfileRequest struct {
-// 	profile  ProfileResponse
-// }
+
+//	type ProfileRequest struct {
+//		profile  ProfileResponse
+//	}
 func NewProfile(profile db.Profile) ProfileResponse {
 	profiles := ProfileResponse{
 		Name:        profile.Name,
@@ -90,9 +93,31 @@ func (server *Server) listProfile(ctx *gin.Context) {
 		return
 	}
 
-    // profiles := ProfileRequest{
-    //     profile: NewProfile(list[]),
+	// profiles := ProfileRequest{
+	//     profile: NewProfile(list[]),
 	// }
 
 	ctx.JSON(http.StatusOK, list)
+}
+
+type Images struct {
+	Image  multipart.FileHeader `form:"image" json:"image"`
+}
+
+func (server *Server) createImage(ctx *gin.Context) {
+	var req Images
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
+	image, _ := ctx.FormFile("image")
+	fmt.Println(image.Filename)
+	err := ctx.SaveUploadedFile(image,"upload/images/ " + image.Filename)
+	if err != nil {
+        ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message":"image upload successful",
+	})
 }

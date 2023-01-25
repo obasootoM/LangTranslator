@@ -17,11 +17,11 @@ dropdb:
 	sudo docker exec -it root dropdb client	
 
 migrateup:
-	migrate -path db/migration -database "postgresql://root:postgres@localhost:5432/client?sslmode=disable" -verbose up 	
+	migrate -path db/migration -database "postgresql://root:postgres@localhost:8001/client?sslmode=disable" -verbose up 	
 
 
 migratedown:
-	migrate -path db/migration -database "postgresql://root:postgres@localhost:5432/client?sslmode=disable" -verbose down
+	migrate -path db/migration -database "postgresql://root:postgres@localhost:8001/client?sslmode=disable" -verbose down
 
 test:
 	go test -v ./...

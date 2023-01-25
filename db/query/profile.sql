@@ -1,19 +1,21 @@
 -- name: CreateProfile :one
 INSERT INTO profile (
   name,
+  image,
   gender,
   email,
   phone_number,
   address_line,
   country,
   native_language
-) VALUES ($1,$2,$3,$4,$5,$6,$7)
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 RETURNING *;
 
 
 -- name: UpdateProfile :one
 UPDATE profile 
-  set name =$7,
+  set name =$8,
+  image = $7,
   address_line = $6,
   gender = $5,
   email = $4,
