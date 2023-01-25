@@ -22,6 +22,7 @@ ALTER TABLE "sessions" ADD FOREIGN KEY ("email") REFERENCES "client" ("email");
 
 CREATE TABLE "profile" (
   "id" bigserial PRIMARY KEY, 
+  "image" varchar NOT NULL,
   "name" varchar NOT NULL,
   "gender" varchar NOT NULL,
   "phone_number" varchar NOT NULL,
@@ -49,4 +50,16 @@ CREATE TABLE "orders" (
   "delivary_speed" varchar NOT NULL, 
   "translator_request" varchar NOT NULL,  
   "delivary_address" varchar NOT NULL
+);
+
+CREATE TABLE "pages" (
+  "id" bigserial PRIMARY KEY,
+  "source_language" varchar NOT NULL, 
+  "target_language" varchar NOT NULL, 
+  "file" varchar NOT NULL,
+  "profession" varchar NOT NULL,
+  "category" varchar NOT NULL,
+  "field" varchar NOT NULL,
+  "duration" varchar NOT NULL,
+  "additional_service" varchar NOT NULL
 );

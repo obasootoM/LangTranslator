@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: lang-trans-api-deployment
+  name: client-api-deployment
   labels:
-    app: lang-trans-api
+    app: client-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: lang-trans-api
+      app: client-api
   template:
     metadata:
       labels:
-        app: lang-trans-api
+        app: client-api
     spec:
       containers:
-      - name: lang-trans-api
+      - name: client-api
         image: 190661032801.dkr.ecr.us-east-1.amazonaws.com/client:b0999dc3b40e6cdf7cc32aea50fa40e961119116
         ports:
         - containerPort: 8000

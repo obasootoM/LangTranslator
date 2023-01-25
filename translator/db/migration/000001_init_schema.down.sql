@@ -1,2 +1,0 @@
-DROP TABLE IF EXISTS translator;
-DROP TABLE IF EXISTS sessions;

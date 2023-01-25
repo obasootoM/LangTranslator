@@ -30,13 +30,16 @@ func NewServer(store *db.Store, config config.Config) (*Server, error) {
 	router.POST("/client/signup", server.createClient)
 	router.POST("/client/login", server.loginClient)
 	router.POST("/client/profile", server.createProfile)
+	router.POST("/client/profile/image", server.createImage)
 	router.POST("/client/chanPassword", server.changePassword)
+	router.POST("/client/orderpage", server.createPage)
+	router.POST("/client/order", server.createOrder)
+	router.POST("/client/file", server.createFile)
 	auth := router.Group("/admin")
 	auth.GET("/client/get", server.getClientEmail)
 	auth.DELETE("/client/delete", server.deleteclient)
 	router.GET("/client/logout", server.logout)
 	auth.GET("/client/list", server.listProfile)
-	auth.POST("/client/order", server.createOrder)
 
 	server.router = router
 	return &server, nil
@@ -45,9 +48,7 @@ func NewServer(store *db.Store, config config.Config) (*Server, error) {
 func errorResponse(err error) gin.H {
 	return gin.H{"err": err.Error()}
 }
-func (server Server) StartTls(address string) error {
-	return server.router.RunTLS(address, "cert.pem", "key.pem")
-}
+
 func (server Server) Start(address string) error {
 	return server.router.Run(address)
 }

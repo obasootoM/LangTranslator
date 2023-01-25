@@ -12,18 +12,20 @@ import (
 const createProfile = `-- name: CreateProfile :one
 INSERT INTO profile (
   name,
+  image,
   gender,
   email,
   phone_number,
   address_line,
   country,
   native_language
-) VALUES ($1,$2,$3,$4,$5,$6,$7)
-RETURNING id, name, gender, phone_number, email, address_line, country, native_language, created_at
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+RETURNING id, image, name, gender, phone_number, email, address_line, country, native_language, created_at
 `
 
 type CreateProfileParams struct {
 	Name           string `json:"name"`
+	Image          string `json:"image"`
 	Gender         string `json:"gender"`
 	Email          string `json:"email"`
 	PhoneNumber    string `json:"phone_number"`
@@ -35,6 +37,7 @@ type CreateProfileParams struct {
 func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) (Profile, error) {
 	row := q.db.QueryRowContext(ctx, createProfile,
 		arg.Name,
+		arg.Image,
 		arg.Gender,
 		arg.Email,
 		arg.PhoneNumber,
@@ -45,6 +48,7 @@ func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) (P
 	var i Profile
 	err := row.Scan(
 		&i.ID,
+		&i.Image,
 		&i.Name,
 		&i.Gender,
 		&i.PhoneNumber,
@@ -58,7 +62,7 @@ func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) (P
 }
 
 const getProfile = `-- name: GetProfile :one
-SELECT id, name, gender, phone_number, email, address_line, country, native_language, created_at FROM profile 
+SELECT id, image, name, gender, phone_number, email, address_line, country, native_language, created_at FROM profile 
 WHERE  email = $1
 LIMIT 1
 `
@@ -68,6 +72,7 @@ func (q *Queries) GetProfile(ctx context.Context, email string) (Profile, error)
 	var i Profile
 	err := row.Scan(
 		&i.ID,
+		&i.Image,
 		&i.Name,
 		&i.Gender,
 		&i.PhoneNumber,
@@ -81,7 +86,7 @@ func (q *Queries) GetProfile(ctx context.Context, email string) (Profile, error)
 }
 
 const listProfile = `-- name: ListProfile :many
-SELECT id, name, gender, phone_number, email, address_line, country, native_language, created_at FROM profile
+SELECT id, image, name, gender, phone_number, email, address_line, country, native_language, created_at FROM profile
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -103,6 +108,7 @@ func (q *Queries) ListProfile(ctx context.Context, arg ListProfileParams) ([]Pro
 		var i Profile
 		if err := rows.Scan(
 			&i.ID,
+			&i.Image,
 			&i.Name,
 			&i.Gender,
 			&i.PhoneNumber,
@@ -127,14 +133,15 @@ func (q *Queries) ListProfile(ctx context.Context, arg ListProfileParams) ([]Pro
 
 const updateProfile = `-- name: UpdateProfile :one
 UPDATE profile 
-  set name =$7,
+  set name =$8,
+  image = $7,
   address_line = $6,
   gender = $5,
   email = $4,
   phone_number = $3,
   country = $2 
 WHERE id = $1
-RETURNING id, name, gender, phone_number, email, address_line, country, native_language, created_at
+RETURNING id, image, name, gender, phone_number, email, address_line, country, native_language, created_at
 `
 
 type UpdateProfileParams struct {
@@ -144,6 +151,7 @@ type UpdateProfileParams struct {
 	Email       string `json:"email"`
 	Gender      string `json:"gender"`
 	AddressLine string `json:"address_line"`
+	Image       string `json:"image"`
 	Name        string `json:"name"`
 }
 
@@ -155,11 +163,13 @@ func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (P
 		arg.Email,
 		arg.Gender,
 		arg.AddressLine,
+		arg.Image,
 		arg.Name,
 	)
 	var i Profile
 	err := row.Scan(
 		&i.ID,
+		&i.Image,
 		&i.Name,
 		&i.Gender,
 		&i.PhoneNumber,

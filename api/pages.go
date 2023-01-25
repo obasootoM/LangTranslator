@@ -1,0 +1,76 @@
+package api
+
+import (
+	"bytes"
+	_ "encoding/base64"
+	"fmt"
+	_ "fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	db "github.com/obasootom/langtranslator/db/sqlc"
+)
+
+type Pages struct {
+	SourceLanguage    string                `json:"sourcelanguage" form:"sourcelanguage" binding:"required"`
+	TargetLanguage    string                `json:"targetlanguage" form:"targetlanguage" binding:"required"`
+	Profession        string                `json:"profession" form:"profession" binding:"required,oneof=standard professional premium"`
+	Category          string                `json:"category" form:"category" binding:"required"`
+	Field             string                `json:"field" form:"field" binding:"required"`
+	Duration          string                `json:"duration" form:"duration" binding:"required"`
+	AdditionalService string                `json:"additionalservice" form:"additionalservice" binding:"required"`
+}
+
+func (server *Server) createPage(ctx *gin.Context) {
+	var req Pages
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
+
+
+	arg := db.CreateClientPagesParams{
+		SourceLanguage:    req.SourceLanguage,
+		TargetLanguage:    req.TargetLanguage,
+		Profession:        req.Profession,
+		Category:          req.Category,
+		Field:             req.Field,
+		Duration:          req.Duration,
+		AdditionalService: req.AdditionalService,
+	}
+
+	page, err := server.store.CreateClientPages(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, page)
+}
+type File struct {
+	File *multipart.FileHeader  `json:"file" form:"file" binding:"required"`
+}
+func (server *Server) createFile(ctx *gin.Context) {
+	var req File
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
+	file,header, _ := ctx.Request.FormFile("file")
+	err := ctx.SaveUploadedFile(header,"upload/files/" + header.Filename)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
+		return
+	}
+	buf := bytes.NewBuffer(nil) 
+	numbers,err := io.Copy(buf,file)
+    if err != nil{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message":"cannot read file", 
+		})
+	}
+   
+	
+	ctx.JSON(http.StatusOK, fmt.Sprintf("number of words :%v", numbers))
+}

@@ -37,8 +37,21 @@ type Order struct {
 	DelivaryAddress          string `json:"delivary_address"`
 }
 
+type Page struct {
+	ID                int64  `json:"id"`
+	SourceLanguage    string `json:"source_language"`
+	TargetLanguage    string `json:"target_language"`
+	File              string `json:"file"`
+	Profession        string `json:"profession"`
+	Category          string `json:"category"`
+	Field             string `json:"field"`
+	Duration          string `json:"duration"`
+	AdditionalService string `json:"additional_service"`
+}
+
 type Profile struct {
 	ID             int64     `json:"id"`
+	Image          string    `json:"image"`
 	Name           string    `json:"name"`
 	Gender         string    `json:"gender"`
 	PhoneNumber    string    `json:"phone_number"`
