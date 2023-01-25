@@ -1,11 +1,16 @@
 package api
 
 import (
-	"fmt"
+	"context"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 	db "github.com/obasootom/langtranslator/db/sqlc"
@@ -111,13 +116,32 @@ func (server *Server) createImage(ctx *gin.Context) {
 		return
 	}
 	image, _ := ctx.FormFile("image")
-	fmt.Println(image.Filename)
-	err := ctx.SaveUploadedFile(image,"upload/images/ " + image.Filename)
+	
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-        ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		log.Printf("error: %v", err)
+		return
+	}
+	client := s3.NewFromConfig(cfg)
+	uploader := manager.NewUploader(client)
+	uploadFiles,openErr := image.Open()
+    if openErr != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+            "message":"cannot open s3",
+		})
+		return
+	}
+	result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+		Bucket: aws.String("file-image-bucket"),
+		Key:    aws.String(image.Filename),
+		Body:   uploadFiles,
+		ACL: "public-read",
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"message":"image upload successful",
+		"message":result.Location,
 	})
 }
