@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: client-api
-        image: 190661032801.dkr.ecr.us-east-1.amazonaws.com/client:c1fc8709ce457f1398fd6324c5b4155754904414
+        image: 190661032801.dkr.ecr.us-east-1.amazonaws.com/client:c7aaf3732103c0c96f39ca40c9c19e8d42f12f0f
         ports:
         - containerPort: 8000
