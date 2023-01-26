@@ -3,9 +3,7 @@ package api
 import (
 	"bytes"
 	"context"
-	_ "encoding/base64"
 	"fmt"
-	_ "fmt"
 	"io"
 	"log"
 	"mime/multipart"
