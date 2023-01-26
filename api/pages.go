@@ -72,10 +72,10 @@ func (server *Server) createFile(ctx *gin.Context) {
 
 	client := s3.NewFromConfig(cfg)
 	uploader := manager.NewUploader(client)
-	uploadFile,openErr := header.Open()
-    if openErr != nil {
+	uploadFile, openErr := header.Open()
+	if openErr != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-            "message":"cannot open s3",
+			"message": "cannot open s3",
 		})
 		return
 	}
@@ -83,7 +83,7 @@ func (server *Server) createFile(ctx *gin.Context) {
 		Bucket: aws.String("file-image-bucket"),
 		Key:    aws.String(header.Filename),
 		Body:   uploadFile,
-		ACL: "public-read",
+		ACL:    "us-east-1",
 	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -97,5 +97,5 @@ func (server *Server) createFile(ctx *gin.Context) {
 		})
 	}
 
-	ctx.JSON(http.StatusOK, fmt.Sprintf("number of words :%v,%v",numbers, result.Location))
+	ctx.JSON(http.StatusOK, fmt.Sprintf("number of words :%v,%v", numbers, result.Location))
 }
