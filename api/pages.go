@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	db "github.com/obasootom/langtranslator/db/sqlc"
 )
 
@@ -61,6 +62,11 @@ func (server *Server) createFile(ctx *gin.Context) {
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusNotFound, errorResponse(err))
 		return
+	}
+
+	err := godotenv.Load()
+	if err != nil{
+        log.Fatal("Error loading .env file")
 	}
 	file, header, _ := ctx.Request.FormFile("file")
 
