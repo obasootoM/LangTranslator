@@ -17,7 +17,7 @@ dropdb:
 	sudo docker exec -it root dropdb client	
 
 migrateup:
-	migrate -path db/migration -database "postgresql://root:postgres@localhost:8001/client?sslmode=disable" -verbose up 	
+	migrate -path db/migration -database "postgresql://root:C8BghZcqilA5ABvMKqo4@client-database.ciwvugamyw8r.us-east-1.rds.amazonaws.com:5432/client_database?sslmode=disable" -verbose up 	
 
 
 migratedown:
